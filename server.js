@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔗 CONEXÃO SUPABASE (Verifique se as chaves estão iguais às do seu painel!)
+// 🔗 CONEXÃO SUPABASE
 const supabase = createClient('https://frhgxnelijofoztlfqdo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyaGd4bmVsaWpvZm96dGxmYWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzMTA0MTMsImV4cCI6MjA1OTg4NjQxM30.X4L6H1-6-p6yY6F_X-P6yY6F_X-P6yY6F_X-P6yY6F8');
 
 // 💰 MERCADO PAGO
@@ -17,10 +17,8 @@ const SENHA_ADMIN = 'IRB2026';
 let precoCota = 10; 
 
 app.get('/status-rifa', async (req, res) => {
-    // Limpa pendentes de 10 min antes de mostrar os números
     const dezMinAtras = new Date(Date.now() - 10 * 60000).toISOString();
     await supabase.from('rifas').delete().eq('status', 'Pendente').lt('criado_em', dezMinAtras);
-    
     const { data } = await supabase.from('rifas').select('*');
     const dbFormatado = {};
     if (data) data.forEach(i => dbFormatado[i.id] = i);
@@ -31,37 +29,38 @@ app.post('/gerar-pagamento', async (req, res) => {
     try {
         const { numeros, comprador, zap, vendedor } = req.body;
 
-        // 1. TENTA RESERVAR NO BANCO (Se já existir, o Supabase vai dar erro e impede a venda dupla)
+        // 🛡️ RESERVA IMEDIATA NO BANCO (GARANTE O LARANJA)
         const reservas = numeros.map(n => ({
             id: n, nome: comprador, zap, vendedor: vendedor || "Venda Direta", status: 'Pendente'
         }));
 
         const { error } = await supabase.from('rifas').insert(reservas);
-        if (error) return res.status(400).json({ erro: "Número já reservado ou erro no banco." });
+        if (error) return res.status(400).json({ erro: "Número já reservado!" });
 
-        // 2. GERA O LINK DO MERCADO PAGO
         const preference = new Preference(client);
         const response = await preference.create({
             body: {
                 items: [{ title: `Rifa Terceirão - Cotas: ${numeros.join(', ')}`, quantity: 1, unit_price: Number(numeros.length * precoCota), currency_id: 'BRL' }],
                 external_reference: numeros.join(','),
                 notification_url: "https://rifa-backend-e44o.onrender.com/webhook",
-                back_urls: { success: "https://rifaterceirao2026.netlify.app" },
+                back_urls: { 
+                    success: "https://rifaterceiraoopo.netlify.app",
+                    failure: "https://rifaterceiraoopo.netlify.app",
+                    pending: "https://rifaterceiraoopo.netlify.app"
+                },
                 auto_return: "approved",
             }
         });
 
         res.json({ link: response.init_point });
-    } catch (e) {
-        res.status(500).json({ erro: "Erro interno no servidor." });
-    }
+    } catch (e) { res.status(500).json({ erro: "Erro no servidor" }); }
 });
 
 app.post('/webhook', async (req, res) => {
     const { query } = req;
     if ((query.topic || query.type) === 'payment') {
+        const paymentId = query.id || req.body.data.id;
         try {
-            const paymentId = query.id || req.body.data.id;
             const payment = new Payment(client);
             const resultado = await payment.get({ id: paymentId });
             if (resultado.status === 'approved') {
@@ -84,4 +83,4 @@ app.post('/admin/acao', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("🚀 Motor Blue Blindado Online!"));
+app.listen(PORT, () => console.log("🚀 Motor Blue OPO Online!"));
