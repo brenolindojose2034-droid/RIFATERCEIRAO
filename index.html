@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa Terceirão 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #d14771; --secondary: #0a2342; --accent: #f1c40f; --bg: #fdf2f5; --white: #ffffff; --green: #2ecc71; --orange: #f39c12; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg); color: var(--secondary); margin: 0; padding: 0; }
+
+        .header { background: linear-gradient(135deg, var(--secondary), #020813); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px; }
+        .container { max-width: 800px; margin: -40px auto 40px; padding: 20px; }
+        .card { background: var(--white); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        .grid-numeros { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin: 20px 0; }
+        @media (max-width: 600px) { .grid-numeros { grid-template-columns: repeat(5, 1fr); } }
+
+        .n-btn { background: #eee; border: none; padding: 12px 0; border-radius: 10px; font-weight: 800; cursor: pointer; color: #777; }
+        .n-btn.livre { background: #ffe6eb; color: var(--primary); }
+        .n-btn.sel { background: var(--green) !important; color: white; }
+        .n-btn.pendente { background: var(--orange) !important; color: white; cursor: not-allowed; }
+        .n-btn.pago { background: #bbb !important; color: white; cursor: not-allowed; }
+
+        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1.1em; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
+        .modal-content { background:white; padding:30px; border-radius:25px; width:95%; max-width:450px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
+        
+        /* Legenda */
+        .legenda { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; font-size: 0.8em; }
+        .leg-item { display: flex; align-items: center; gap: 5px; }
+        .box { width: 15px; height: 15px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Rifa Dia das Mães 🌸</h1>
+    <p>Terceirão 2026 - Escola IRB</p>
+</div>
+
+<div class="container">
+    <div id="view-vendas">
+        <div class="card">
+            <div class="legenda">
+                <div class="leg-item"><div class="box" style="background:#ffe6eb"></div> Livre</div>
+                <div class="leg-item"><div class="box" style="background:var(--orange)"></div> Reservado</div>
+                <div class="leg-item"><div class="box" style="background:#bbb"></div> Pago</div>
+            </div>
+            <div class="grid-numeros" id="grid"></div>
+            <button class="btn-main" onclick="abrirCheckout()">RESERVAR SELECIONADOS</button>
+            <button onclick="abrirAdmin()" style="margin-top:15px; background:none; border:none; color:#999; cursor:pointer; width:100%">Acesso Administrativo</button>
+        </div>
+    </div>
+
+    <!-- PAINEL ADMIN -->
+    <div id="view-admin" style="display:none;">
+        <div class="card">
+            <h2>Painel de Controle ⚙️</h2>
+            <div id="lista-adm"></div>
+            <button class="btn-main" onclick="location.reload()" style="background:var(--secondary); margin-top:20px;">SAIR DO PAINEL</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal-checkout">
+    <div class="modal-content">
+        <h2>Dados da Compra</h2>
+        <p>Cotas: <strong id="resumo-cotas"></strong></p>
+        <input type="text" id="c-nome" placeholder="Seu Nome Completo">
+        <input type="tel" id="c-zap" placeholder="Seu WhatsApp">
+        <input type="text" id="c-vendedor" placeholder="Quem te indicou? (Escreva o nome)">
+        <button class="btn-main" id="btn-pay" onclick="finalizarPagamento()">PAGAR NO MERCADO PAGO</button>
+        <button onclick="fecharModal()" style="width:100%; border:none; background:none; margin-top:10px; color:#999; cursor:pointer;">Cancelar</button>
+    </div>
+</div>
+
+<script>
+    let dbStatus = {};
+    let selecionados = [];
+    let precoCota = 10;
+
+    // Busca o status do servidor assim que abre o site
+    async function carregarStatus() {
+        try {
+            const res = await fetch('http://localhost:3000/status-rifa');
+            dbStatus = await res.json();
+            renderizarGrade();
+        } catch (e) {
+            console.error("Servidor Offline");
+        }
+    }
+
+    function renderizarGrade() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        for (let i = 1; i <= 100; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = 'n-btn';
+            
+            if (dbStatus[i]) {
+                btn.classList.add(dbStatus[i].status === 'Pago' ? 'pago' : 'pendente');
+            } else {
+                btn.classList.add('livre');
+                btn.onclick = () => {
+                    if(selecionados.includes(i)) {
+                        selecionados = selecionados.filter(n => n !== i);
+                        btn.classList.remove('sel');
+                    } else {
+                        selecionados.push(i);
+                        btn.classList.add('sel');
+                    }
+                };
+            }
+            grid.appendChild(btn);
+        }
+    }
+
+    function abrirCheckout() {
+        if(selecionados.length === 0) return alert("Escolha um número!");
+        document.getElementById('resumo-cotas').innerText = selecionados.join(', ');
+        document.getElementById('modal-checkout').style.display = 'flex';
+    }
+
+    async function finalizarPagamento() {
+        const comprador = document.getElementById('c-nome').value;
+        const zap = document.getElementById('c-zap').value;
+        const vendedor = document.getElementById('c-vendedor').value;
+
+        if(!comprador || !vendedor) return alert("Preencha todos os campos!");
+
+        const btn = document.getElementById('btn-pay');
+        btn.innerText = "PROCESSANDO...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('http://localhost:3000/gerar-pagamento', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    valor: selecionados.length * precoCota,
+                    numeros: selecionados,
+                    comprador, zap, vendedor
+                })
+            });
+            const data = await res.json();
+            if(data.link) {
+                confetti({ particleCount: 150, spread: 70 });
+                setTimeout(() => window.location.href = data.link, 1000);
+            } else {
+                alert(data.erro);
+                location.reload();
+            }
+        } catch (e) {
+            alert("Erro ao conectar com o servidor!");
+            btn.disabled = false;
+            btn.innerText = "PAGAR NO MERCADO PAGO";
+        }
+    }
+
+    // --- ADMIN ---
+    async function abrirAdmin() {
+        if(prompt("Senha:") === 'IRB2026') {
+            document.getElementById('view-vendas').style.display = 'none';
+            document.getElementById('view-admin').style.display = 'block';
+            renderAdmin();
+        }
+    }
+
+    function renderAdmin() {
+        const lista = document.getElementById('lista-adm');
+        lista.innerHTML = '';
+        Object.keys(dbStatus).forEach(n => {
+            const d = dbStatus[n];
+            lista.innerHTML += `
+                <div style="border-bottom:1px solid #eee; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong>#${n}</strong> - ${d.nome} <br><small>Indicado por: ${d.vendedor}</small></div>
+                    <div>
+                        ${d.status === 'Pendente' ? `<button onclick="admAcao(${n}, 'pagar')" style="background:var(--green); color:white; border:none; padding:5px; border-radius:5px; cursor:pointer;">✔ Pago</button>` : ''}
+                        <button onclick="admAcao(${n}, 'excluir')" style="background:red; color:white; border:none; padding:5px; border-radius:5px; cursor:pointer; margin-left:5px;">🗑</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    async function admAcao(numero, acao) {
+        await fetch('http://localhost:3000/admin/acao', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ numero, acao })
+        });
+        location.reload();
+    }
+
+    function fecharModal() { document.getElementById('modal-checkout').style.display = 'none'; }
+
+    carregarStatus();
+</script>
+</body>
+</html>
