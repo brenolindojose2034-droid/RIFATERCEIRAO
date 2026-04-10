@@ -3,28 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Terceirão 2026</title>
+    <title>Rifa das Mães - Terceirão 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #d14771; --secondary: #0a2342; --green: #2ecc71; --orange: #f39c12; --bg: #fdf2f5; }
-        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg); margin: 0; padding: 0; }
-        .header { background: var(--secondary); color: white; padding: 30px; text-align: center; border-radius: 0 0 20px 20px; }
-        .container { max-width: 800px; margin: 20px auto; padding: 15px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .grid-numeros { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; margin: 20px 0; }
-        .n-btn { border: none; padding: 15px 0; border-radius: 8px; font-weight: 800; cursor: pointer; background: #eee; }
+        :root { --primary: #d14771; --secondary: #0a2342; --accent: #f1c40f; --bg: #fdf2f5; --white: #ffffff; --green: #2ecc71; --orange: #f39c12; --red: #ff4757; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: 0.3s; }
+        body { background-color: var(--bg); color: var(--secondary); margin: 0; padding: 0; }
+
+        .header { background: linear-gradient(135deg, var(--secondary), #020813); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px; }
+        .container { max-width: 900px; margin: -40px auto 40px; padding: 10px; }
+        .card { background: var(--white); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 25px; }
+        .stat-card { background: var(--bg); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #eee; }
+        .stat-card h4 { margin: 0; font-size: 0.8em; color: #777; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 1.4em; font-weight: 800; color: var(--secondary); }
+
+        /* Grid de Números */
+        .grid-numeros { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin: 20px 0; }
+        @media (max-width: 600px) { .grid-numeros { grid-template-columns: repeat(5, 1fr); } }
+
+        .n-btn { background: #eee; border: none; padding: 12px 0; border-radius: 10px; font-weight: 800; cursor: pointer; color: #777; font-size: 0.9em; }
         .n-btn.livre { background: #ffe6eb; color: var(--primary); }
-        .n-btn.sel { background: var(--green) !important; color: white; }
+        .n-btn.sel { background: var(--green) !important; color: white; transform: scale(1.1); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); }
         .n-btn.pendente { background: var(--orange) !important; color: white; cursor: not-allowed; }
         .n-btn.pago { background: var(--secondary) !important; color: white; cursor: not-allowed; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1.1em; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
-        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; }
-        .modal-content { background:white; padding:25px; border-radius:15px; width:90%; max-width:400px; text-align: center; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+
+        /* Botões */
+        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1.1em; box-shadow: 0 5px 15px rgba(209, 71, 113, 0.4); border: none; }
+        .btn-main:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        .btn-sec { background: var(--secondary); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-export { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
+        /* Tabelas */
+        .admin-table-container { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        th { text-align: left; padding: 12px; background: #f8f9fa; color: #777; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        
+        /* Modal */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
+        .modal-content { background:white; padding:30px; border-radius:25px; width:95%; max-width:450px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; outline: none; font-size: 1em; }
     </style>
 </head>
 <body>
@@ -37,38 +59,56 @@
 <div class="container">
     <div id="view-vendas">
         <div class="card">
-            <p style="text-align:center; font-weight:bold;">Valor da Cota: R$ <span id="display-preco">--</span></p>
+            <div id="loading-msg" style="text-align:center; padding: 10px; color: var(--primary); font-weight: bold;">
+                Sincronizando com Banco de Dados... ⏳
+            </div>
+            <p style="text-align:center; font-weight:bold; color:var(--primary);">Valor por cota: R$ <span id="display-preco">--</span></p>
             <div class="grid-numeros" id="grid"></div>
-            <button class="btn-main" onclick="abrirCheckout()">RESERVAR SELECIONADOS</button>
-            <button onclick="pedirSenha()" style="background:none; border:none; color:#ccc; width:100%; margin-top:20px; cursor:pointer;">Admin ⚙️</button>
+            <button class="btn-main" id="btn-reservar" onclick="abrirCheckout()">RESERVAR SELECIONADOS</button>
+            <button onclick="pedirSenha()" style="margin-top:25px; background:none; border:none; color:#bbb; cursor:pointer; width:100%; font-size: 0.8em;">Acesso Restrito ⚙️</button>
         </div>
     </div>
 
     <div id="view-admin" style="display:none;">
+        <div class="stats-grid">
+            <div class="stat-card"><h4>💰 Pago</h4><p id="stat-pago">R$ 0</p></div>
+            <div class="stat-card"><h4>⏳ Pendente</h4><p id="stat-pendente">R$ 0</p></div>
+            <div class="stat-card"><h4>🎟️ Vendidos</h4><p id="stat-total">0/100</p></div>
+        </div>
+
         <div class="card">
-            <h3>Painel de Controle</h3>
-            <button onclick="baixarPlanilha()" style="background:var(--green); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">📥 Baixar Lista CSV</button>
-            <button onclick="mudarPreco()" style="margin-left:10px;">💲 Mudar Preço</button>
-            
-            <div style="overflow-x:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0;">Lista de Compradores</h3>
+                <button class="btn-export" onclick="baixarPlanilha()">📥 Exportar CSV</button>
+            </div>
+            <div class="admin-table-container">
                 <table>
-                    <thead><tr><th>Nº</th><th>Nome</th><th>Status</th><th>Ações</th></tr></thead>
-                    <tbody id="tabela-admin"></tbody>
+                    <thead>
+                        <tr><th>Nº</th><th>Comprador</th><th>Vendedor</th><th>Status</th><th>Ações</th></tr>
+                    </thead>
+                    <tbody id="tabela-admin-body"></tbody>
                 </table>
             </div>
-            <button class="btn-main" onclick="location.reload()" style="margin-top:20px; background:var(--secondary);">VOLTAR AO SITE</button>
+        </div>
+
+        <div class="card">
+            <h3>Ranking de Vendedores</h3>
+            <div id="ranking-vendedores"></div>
+            <button class="btn-sec" onclick="location.reload()">SAIR DO MODO ADMIN</button>
         </div>
     </div>
 </div>
 
 <div class="modal" id="modal-checkout">
     <div class="modal-content">
-        <h3>Finalizar Reserva</h3>
-        <p>Números: <span id="resumo-cotas"></span></p>
-        <input type="text" id="c-nome" placeholder="Seu Nome">
-        <input type="tel" id="c-zap" placeholder="WhatsApp">
-        <input type="text" id="c-vendedor" placeholder="Quem te indicou?">
-        <button class="btn-main" id="btn-pay" onclick="finalizarPagamento()">PAGAR AGORA</button>
+        <h2 style="color:var(--primary)">Finalizar Reserva</h2>
+        <p>Números: <strong id="resumo-cotas" style="background: var(--accent); padding: 2px 8px; border-radius: 5px;"></strong></p>
+        <p>Total: <strong id="resumo-valor" style="color: var(--green);"></strong></p>
+        <input type="text" id="c-nome" placeholder="Nome do Comprador">
+        <input type="tel" id="c-zap" placeholder="WhatsApp (DDD + Número)">
+        <input type="text" id="c-vendedor" placeholder="Nome do Aluno (Vendedor)">
+        <button class="btn-main" id="btn-pay" onclick="finalizarPagamento()">PAGAR NO MERCADO PAGO</button>
+        <button onclick="fecharModal()" style="width:100%; border:none; background:none; margin-top:15px; color:#999; cursor:pointer;">Cancelar</button>
     </div>
 </div>
 
@@ -79,17 +119,25 @@
     let selecionados = [];
     let senhaAdmin = '';
 
+    // 1. CARREGAR DADOS DO SERVIDOR (QUE BUSCA NO SUPABASE)
     async function carregarStatus() {
         try {
             const res = await fetch(`${API_URL}/status-rifa`);
-            const data = await res.json();
-            dbStatus = data.dados;
-            precoCota = data.preco;
-            document.getElementById('display-preco').innerText = precoCota.toFixed(2);
+            if (res.ok) {
+                const data = await res.json();
+                dbStatus = data.dados;
+                precoCota = data.preco;
+                document.getElementById('display-preco').innerText = precoCota.toFixed(2);
+            }
+        } catch (e) { console.error("Erro de conexão"); }
+        finally {
+            document.getElementById('loading-msg').style.display = 'none';
             renderizarGrade();
-        } catch (e) { alert("Erro ao carregar dados do servidor."); }
+            if(document.getElementById('view-admin').style.display === 'block') renderAdmin();
+        }
     }
 
+    // 2. DESENHAR A GRADE DE 1 A 100
     function renderizarGrade() {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
@@ -98,11 +146,11 @@
             btn.innerText = i;
             btn.className = 'n-btn';
             
-            // Verificação com colchetes dbStatus[i]
             if (dbStatus[i]) {
                 btn.classList.add(dbStatus[i].status === 'Pago' ? 'pago' : 'pendente');
             } else {
                 btn.classList.add('livre');
+                if (selecionados.includes(i)) btn.classList.add('sel');
                 btn.onclick = () => {
                     if(selecionados.includes(i)) {
                         selecionados = selecionados.filter(n => n !== i);
@@ -117,94 +165,125 @@
         }
     }
 
+    // 3. ABRIR MODAL
     function abrirCheckout() {
-        if(selecionados.length === 0) return alert("Escolha um número!");
+        if(selecionados.length === 0) return alert("Selecione ao menos um número!");
         document.getElementById('resumo-cotas').innerText = selecionados.join(', ');
+        document.getElementById('resumo-valor').innerText = `R$ ${(selecionados.length * precoCota).toFixed(2)}`;
         document.getElementById('modal-checkout').style.display = 'flex';
     }
 
+    // 4. ENVIAR PARA O MERCADO PAGO
     async function finalizarPagamento() {
+        const comprador = document.getElementById('c-nome').value;
+        const zap = document.getElementById('c-zap').value;
+        const vendedor = document.getElementById('c-vendedor').value;
+
+        if(!comprador || !zap || !vendedor) return alert("Preencha todos os campos!");
+
         const btn = document.getElementById('btn-pay');
-        btn.disabled = true; btn.innerText = "GERANDO...";
-        
+        btn.innerText = "GERANDO PAGAMENTO... ⏳";
+        btn.disabled = true;
+
         try {
             const res = await fetch(`${API_URL}/gerar-pagamento`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    numeros: selecionados,
-                    comprador: document.getElementById('c-nome').value,
-                    zap: document.getElementById('c-zap').value,
-                    vendedor: document.getElementById('c-vendedor').value
-                })
+                body: JSON.stringify({ numeros: selecionados, comprador, zap, vendedor })
             });
             const data = await res.json();
-            if(data.link) window.location.href = data.link;
-            else alert(data.erro);
-        } catch (e) { alert("Erro na conexão"); btn.disabled = false; }
+            if(data.link) {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                setTimeout(() => window.location.href = data.link, 1200);
+            } else {
+                alert("Erro: " + data.erro);
+                location.reload();
+            }
+        } catch (e) {
+            alert("Erro na comunicação com o servidor.");
+            btn.disabled = false;
+            btn.innerText = "PAGAR NO MERCADO PAGO";
+        }
     }
 
+    // 5. PAINEL ADMINISTRATIVO
     function pedirSenha() {
-        senhaAdmin = prompt("Senha:");
+        senhaAdmin = prompt("Digite a senha de administrador:");
         if(senhaAdmin === 'IRB2026') {
             document.getElementById('view-vendas').style.display = 'none';
             document.getElementById('view-admin').style.display = 'block';
             renderAdmin();
-        }
+        } else if(senhaAdmin) { alert("Senha incorreta!"); }
     }
 
     function renderAdmin() {
-        const tabela = document.getElementById('tabela-admin');
+        const tabela = document.getElementById('tabela-admin-body');
+        const rankingDiv = document.getElementById('ranking-vendedores');
         tabela.innerHTML = '';
+        
+        let totalPago = 0, totalPendente = 0, vendidosCount = 0;
+        let vendedoresRanking = {};
+
         Object.keys(dbStatus).forEach(n => {
             const d = dbStatus[n];
-            tabela.innerHTML += `<tr>
-                <td>#${n}</td><td>${d.nome}</td>
-                <td>${d.status}</td>
-                <td>
-                    <button onclick="admAcao(${n}, 'pagar')">✔</button>
-                    <button onclick="admAcao(${n}, 'excluir')">🗑</button>
-                </td>
-            </tr>`;
+            vendidosCount++;
+            if(d.status === 'Pago') totalPago += precoCota;
+            else totalPendente += precoCota;
+
+            vendedoresRanking[d.vendedor] = (vendedoresRanking[d.vendedor] || 0) + 1;
+
+            tabela.innerHTML += `
+                <tr>
+                    <td><strong>#${n}</strong></td>
+                    <td>${d.nome}</td>
+                    <td>${d.vendedor}</td>
+                    <td><b style="color:${d.status === 'Pago' ? 'var(--secondary)' : 'var(--orange)'}">${d.status}</b></td>
+                    <td>
+                        <button onclick="admAcao(${n}, 'pagar')" style="background:var(--green); border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">✔</button>
+                        <button onclick="admAcao(${n}, 'excluir')" style="background:var(--red); border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer; margin-left:5px;">🗑</button>
+                    </td>
+                </tr>`;
         });
+
+        document.getElementById('stat-pago').innerText = `R$ ${totalPago.toFixed(2)}`;
+        document.getElementById('stat-pendente').innerText = `R$ ${totalPendente.toFixed(2)}`;
+        document.getElementById('stat-total').innerText = `${vendidosCount}/100`;
+
+        rankingDiv.innerHTML = Object.entries(vendedoresRanking)
+            .sort((a,b) => b[1] - a[1])
+            .map(([nome, qtd]) => `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dotted #ccc;"><span>${nome}</span> <strong>${qtd} rifas</strong></div>`)
+            .join('') || 'Nenhuma venda ainda.';
     }
 
     async function admAcao(numero, acao) {
+        if(!confirm(`Deseja realmente ${acao} a cota #${numero}?`)) return;
         await fetch(`${API_URL}/admin/acao`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ numero, acao, senha: senhaAdmin })
         });
-        location.reload();
-    }
-
-    async function mudarPreco() {
-        const novo = prompt("Novo preço:");
-        await fetch(`${API_URL}/admin/config`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ novoPreco: novo, senha: senhaAdmin })
-        });
-        location.reload();
+        carregarStatus();
     }
 
     function baixarPlanilha() {
-        let csv = "Cota,Nome,Zap,Vendedor,Status\n";
+        let csv = "Cota,Comprador,WhatsApp,Vendedor,Status\n";
         Object.keys(dbStatus).forEach(n => {
             const d = dbStatus[n];
             csv += `${n},${d.nome},${d.zap},${d.vendedor},${d.status}\n`;
         });
         
-        // AQUI ESTÁ O AJUSTE CRÍTICO: [csv] dentro dos colchetes
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = url;
-        link.download = "Rifa_Terceirao.csv";
+        link.href = URL.createObjectURL(blob);
+        link.download = "Relatorio_Rifa_Terceirao.csv";
         link.click();
     }
 
+    function fecharModal() { document.getElementById('modal-checkout').style.display = 'none'; }
+
+    // INICIALIZAÇÃO E AUTO-REFRESH (A cada 30 segundos)
     carregarStatus();
+    setInterval(carregarStatus, 30000);
 </script>
 </body>
 </html>
