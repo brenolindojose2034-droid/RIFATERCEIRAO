@@ -7,7 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 🔗 SUPABASE
 const supabase = createClient('https://frhgxnelijofoztlfqdo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyaGd4bmVsaWpvZm96dGxmYWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzMTA0MTMsImV4cCI6MjA1OTg4NjQxM30.X4L6H1-6-p6yY6F_X-P6yY6F_X-P6yY6F_X-P6yY6F8');
+
+// 💰 MERCADO PAGO
 const client = new MercadoPagoConfig({ accessToken: 'APP_USR-4694355899531295-041011-0bf7821dc292c43d8132bfc72e773da6-2411883020' });
 
 const SENHA_ADMIN = 'IRB2026';
@@ -47,12 +50,14 @@ app.post('/webhook', async (req, res) => {
     const { query } = req;
     if ((query.topic || query.type) === 'payment') {
         const paymentId = query.id || req.body.data.id;
-        const payment = new Payment(client);
-        const resultado = await payment.get({ id: paymentId });
-        if (resultado.status === 'approved') {
-            const nms = resultado.external_reference.split(',');
-            for (const n of nms) await supabase.from('rifas').update({ status: 'Pago' }).eq('id', n);
-        }
+        try {
+            const payment = new Payment(client);
+            const resultado = await payment.get({ id: paymentId });
+            if (resultado.status === 'approved') {
+                const nms = resultado.external_reference.split(',');
+                for (const n of nms) await supabase.from('rifas').update({ status: 'Pago' }).eq('id', n);
+            }
+        } catch (e) { console.error(e); }
     }
     res.sendStatus(200);
 });
@@ -68,4 +73,4 @@ app.post('/admin/acao', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("🚀 Motor Blue Online!"));
+app.listen(PORT, () => console.log("🚀 Motor Blue Blindado Online!"));
