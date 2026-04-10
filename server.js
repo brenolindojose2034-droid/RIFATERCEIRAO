@@ -6,23 +6,19 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-// ✅ SEU TOKEN JÁ CONFIGURADO
+// ✅ SEU TOKEN QUE APARECE NO PRINT
 const client = new MercadoPagoConfig({ accessToken: 'APP_USR-4694355899531295-041011-0bf7821dc292c43d8132bfc72e773da6-2411883020' });
 
-// Banco de dados temporário (fica na memória do Render)
 let rifaDB = {}; 
 
-// Rota para ver o status dos números
 app.get('/status-rifa', (req, res) => {
     res.json(rifaDB);
 });
 
-// Rota para gerar o link de pagamento
 app.post('/gerar-pagamento', async (req, res) => {
     try {
         const { valor, numeros, comprador, zap, vendedor } = req.body;
 
-        // Verifica se alguém já reservou esses números
         const ocupados = numeros.filter(n => rifaDB[n]);
         if (ocupados.length > 0) {
             return res.status(400).json({ erro: `Os números ${ocupados.join(', ')} já estão ocupados!` });
@@ -37,11 +33,16 @@ app.post('/gerar-pagamento', async (req, res) => {
                     unit_price: Number(valor),
                     currency_id: 'BRL',
                 }],
+                // 🚀 AQUI ESTÁ A CORREÇÃO:
+                back_urls: {
+                    success: "https://rifaterceirao2026.netlify.app",
+                    failure: "https://rifaterceirao2026.netlify.app",
+                    pending: "https://rifaterceirao2026.netlify.app"
+                },
                 auto_return: "approved",
             }
         });
 
-        // Marca como Pendente (Laranja no site)
         numeros.forEach(n => {
             rifaDB[n] = { nome: comprador, zap, vendedor, status: 'Pendente' };
         });
@@ -54,7 +55,6 @@ app.post('/gerar-pagamento', async (req, res) => {
     }
 });
 
-// Rota Admin
 app.post('/admin/acao', (req, res) => {
     const { numero, acao } = req.body;
     if (rifaDB[numero]) {
