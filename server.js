@@ -6,23 +6,31 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-// ✅ SEU TOKEN QUE APARECE NO PRINT
+// ✅ SEU TOKEN DO MERCADO PAGO
 const client = new MercadoPagoConfig({ accessToken: 'APP_USR-4694355899531295-041011-0bf7821dc292c43d8132bfc72e773da6-2411883020' });
 
+// 🛡️ SISTEMA DE SEGURANÇA E BANCO DE DADOS
 let rifaDB = {}; 
+let config = { precoCota: 10 }; // Preço base protegido
+const SENHA_ADMIN = 'IRB2026'; // A senha agora fica escondida no servidor
 
+// Rota para o site ler os dados
 app.get('/status-rifa', (req, res) => {
-    res.json(rifaDB);
+    res.json({ dados: rifaDB, preco: config.precoCota });
 });
 
+// Rota para gerar pagamento (COM PROTEÇÃO ANTI-HACKER)
 app.post('/gerar-pagamento', async (req, res) => {
     try {
-        const { valor, numeros, comprador, zap, vendedor } = req.body;
+        const { numeros, comprador, zap, vendedor } = req.body;
 
-        const ocupados = numeros.filter(n => rifaDB[n]);
+        const ocupados = numeros.filter(n => rifaDB);
         if (ocupados.length > 0) {
             return res.status(400).json({ erro: `Os números ${ocupados.join(', ')} já estão ocupados!` });
         }
+
+        // 🛡️ O servidor calcula o preço. É impossível fraudar pelo navegador.
+        const valorRealSeguro = numeros.length * config.precoCota;
 
         const preference = new Preference(client);
         const response = await preference.create({
@@ -30,10 +38,9 @@ app.post('/gerar-pagamento', async (req, res) => {
                 items: [{
                     title: `Rifa Terceirão - Cotas: ${numeros.join(', ')}`,
                     quantity: 1,
-                    unit_price: Number(valor),
+                    unit_price: Number(valorRealSeguro),
                     currency_id: 'BRL',
                 }],
-                // 🚀 AQUI ESTÁ A CORREÇÃO:
                 back_urls: {
                     success: "https://rifaterceirao2026.netlify.app",
                     failure: "https://rifaterceirao2026.netlify.app",
@@ -44,7 +51,7 @@ app.post('/gerar-pagamento', async (req, res) => {
         });
 
         numeros.forEach(n => {
-            rifaDB[n] = { nome: comprador, zap, vendedor, status: 'Pendente' };
+            rifaDB = { nome: comprador, zap, vendedor, status: 'Pendente' };
         });
 
         res.json({ link: response.init_point });
@@ -55,12 +62,24 @@ app.post('/gerar-pagamento', async (req, res) => {
     }
 });
 
+// 🛡️ Rota Admin: Confirmar ou Excluir (EXIGE SENHA)
 app.post('/admin/acao', (req, res) => {
-    const { numero, acao } = req.body;
-    if (rifaDB[numero]) {
-        if (acao === 'pagar') rifaDB[numero].status = 'Pago';
-        if (acao === 'excluir') delete rifaDB[numero];
+    const { numero, acao, senha } = req.body;
+    if (senha !== SENHA_ADMIN) return res.status(401).json({ erro: "Acesso Negado: Senha Incorreta!" });
+
+    if (rifaDB) {
+        if (acao === 'pagar') rifaDB.status = 'Pago';
+        if (acao === 'excluir') delete rifaDB;
     }
+    res.json({ ok: true });
+});
+
+// 🛡️ Rota Admin: Alterar Preço da Cota (EXIGE SENHA)
+app.post('/admin/config', (req, res) => {
+    const { novoPreco, senha } = req.body;
+    if (senha !== SENHA_ADMIN) return res.status(401).json({ erro: "Acesso Negado: Senha Incorreta!" });
+    
+    config.precoCota = Number(novoPreco);
     res.json({ ok: true });
 });
 

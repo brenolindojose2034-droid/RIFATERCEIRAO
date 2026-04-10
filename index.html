@@ -3,33 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Dia das Mães - Terceirão 2026</title>
+    <title>Rifa Dia das Mães - Terceirão</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #d14771; --secondary: #0a2342; --accent: #f1c40f; --bg: #fdf2f5; --white: #ffffff; --green: #2ecc71; --orange: #f39c12; }
+        :root { --primary: #d14771; --secondary: #0a2342; --accent: #f1c40f; --bg: #fdf2f5; --white: #ffffff; --green: #2ecc71; --orange: #f39c12; --red: #ff4757; }
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: 0.3s; }
         body { background-color: var(--bg); color: var(--secondary); margin: 0; padding: 0; }
 
         .header { background: linear-gradient(135deg, var(--secondary), #020813); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px; }
-        .container { max-width: 800px; margin: -40px auto 40px; padding: 20px; }
+        .container { max-width: 900px; margin: -40px auto 40px; padding: 10px; }
         .card { background: var(--white); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 25px; }
+        .stat-card { background: var(--bg); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #eee; }
+        .stat-card h4 { margin: 0; font-size: 0.8em; color: #777; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 1.4em; font-weight: 800; color: var(--secondary); }
+
         .grid-numeros { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin: 20px 0; }
         @media (max-width: 600px) { .grid-numeros { grid-template-columns: repeat(5, 1fr); } }
 
-        .n-btn { background: #eee; border: none; padding: 12px 0; border-radius: 10px; font-weight: 800; cursor: pointer; color: #777; }
+        .n-btn { background: #eee; border: none; padding: 12px 0; border-radius: 10px; font-weight: 800; cursor: pointer; color: #777; font-size: 0.9em; }
         .n-btn.livre { background: #ffe6eb; color: var(--primary); }
         .n-btn.sel { background: var(--green) !important; color: white; transform: scale(1.1); }
-        .n-btn.pendente { background: var(--orange) !important; color: white; cursor: not-allowed; }
-        .n-btn.pago { background: #bbb !important; color: white; cursor: not-allowed; }
+        .n-btn.pendente { background: var(--orange) !important; color: white; cursor: not-allowed;}
+        .n-btn.pago { background: var(--secondary) !important; color: white; cursor: not-allowed;}
 
-        .legenda { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 0.8em; font-weight: bold; }
-        .leg-item { display: flex; align-items: center; gap: 5px; }
-        .box { width: 15px; height: 15px; border-radius: 3px; }
-
-        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1.1em; box-shadow: 0 5px 15px rgba(209, 71, 113, 0.4); }
-        .btn-main:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 50px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1.1em; box-shadow: 0 5px 15px rgba(209, 71, 113, 0.4); margin-top: 10px;}
+        .btn-sec { background: var(--secondary); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px;}
+        .btn-export { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px;}
+        
+        .admin-table-container { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        th { text-align: left; padding: 12px; background: #f8f9fa; color: #777; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.8em; font-weight: bold; }
+        .bg-orange { background: var(--orange); color: white; }
+        .bg-green { background: var(--green); color: white; }
 
         .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
         .modal-content { background:white; padding:30px; border-radius:25px; width:95%; max-width:450px; text-align: center; }
@@ -39,36 +49,56 @@
 <body>
 
 <div class="header">
-    <h1>Rifa Dia das Mães 🌸</h1>
-    <p>Apoie o Terceirão 2026 - Escola IRB</p>
+    <h1 id="main-title">Rifa Dia das Mães 🌸</h1>
+    <p id="sub-title">Escola IRB - Terceirão 2026</p>
 </div>
 
 <div class="container">
+    <!-- VISÃO DO COMPRADOR -->
     <div id="view-vendas">
         <div class="card">
-            <div class="legenda">
-                <div class="leg-item"><div class="box" style="background:#ffe6eb"></div> Livre</div>
-                <div class="leg-item"><div class="box" style="background:var(--orange)"></div> Reservado</div>
-                <div class="leg-item"><div class="box" style="background:#bbb"></div> Pago</div>
+            <div id="loading-msg" style="text-align:center; padding: 10px; color: var(--primary); font-weight: bold;">
+                Conectando ao servidor protegido... ⏳
             </div>
-            
-            <div id="loading-msg" style="text-align:center; padding: 20px; color: var(--primary); font-weight: bold;">
-                Conectando ao servidor... ⏳<br><small>(Pode demorar 30s se o servidor estiver "dormindo")</small>
-            </div>
-
+            <p style="text-align:center; font-weight:bold; color:var(--primary);">Valor por cota: R$ <span id="display-preco">--</span></p>
             <div class="grid-numeros" id="grid"></div>
-            
-            <button class="btn-main" id="btn-reserva" onclick="abrirCheckout()">RESERVAR SELECIONADOS</button>
-            <button onclick="abrirAdmin()" style="margin-top:20px; background:none; border:none; color:#bbb; cursor:pointer; width:100%; font-size: 0.8em;">Acesso Administrativo ⚙️</button>
+            <button class="btn-main" onclick="abrirCheckout()">RESERVAR SELECIONADOS</button>
+            <button onclick="pedirSenha()" style="margin-top:20px; background:none; border:none; color:#bbb; cursor:pointer; width:100%; font-size: 0.8em;">Acesso Administrativo ⚙️</button>
         </div>
     </div>
 
-    <!-- PAINEL ADMIN -->
+    <!-- VISÃO DO ADMIN -->
     <div id="view-admin" style="display:none;">
+        <div class="stats-grid">
+            <div class="stat-card"><h4>💰 Pago</h4><p id="stat-pago">R$ 0</p></div>
+            <div class="stat-card"><h4>⏳ Pendente</h4><p id="stat-pendente">R$ 0</p></div>
+            <div class="stat-card"><h4>🎟️ Vendidos</h4><p id="stat-total">0/100</p></div>
+        </div>
+
         <div class="card">
-            <h2>Vendas Realizadas ⚙️</h2>
-            <div id="lista-adm"></div>
-            <button class="btn-main" onclick="location.reload()" style="background:var(--secondary); margin-top:20px;">VOLTAR AO SITE</button>
+            <h3>Ferramentas de Gestão</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-export" onclick="baixarPlanilha()">📥 Baixar Lista (Excel/CSV)</button>
+                <button class="btn-sec" onclick="mudarPreco()">💲 Alterar Preço da Cota</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Lista de Compradores</h3>
+            <div class="admin-table-container">
+                <table>
+                    <thead>
+                        <tr><th>Nº</th><th>Nome</th><th>Vendedor</th><th>Status</th><th>Ações</th></tr>
+                    </thead>
+                    <tbody id="tabela-admin-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Ranking de Vendedores</h3>
+            <div id="ranking-vendedores"></div>
+            <button class="btn-sec" onclick="location.reload()" style="margin-top:20px;">Sair do Painel Admin</button>
         </div>
     </div>
 </div>
@@ -77,34 +107,35 @@
 <div class="modal" id="modal-checkout">
     <div class="modal-content">
         <h2 style="color:var(--primary)">Finalizar Reserva</h2>
-        <p>Cotas: <strong id="resumo-cotas" style="background: var(--accent); padding: 2px 8px; border-radius: 5px;"></strong></p>
+        <p>Cotas escolhidas: <strong id="resumo-cotas" style="background: var(--accent); padding: 2px 8px; border-radius: 5px;"></strong></p>
+        <p>Total a pagar: <strong id="resumo-valor" style="color: var(--green);"></strong></p>
         <input type="text" id="c-nome" placeholder="Seu Nome Completo">
-        <input type="tel" id="c-zap" placeholder="Seu WhatsApp (Ex: 819...)">
-        <input type="text" id="c-vendedor" placeholder="Quem indicou? (Escreva o nome)">
-        
-        <button class="btn-main" id="btn-pay" onclick="finalizarPagamento()">PAGAR NO MERCADO PAGO</button>
+        <input type="tel" id="c-zap" placeholder="WhatsApp (Ex: 81999999999)">
+        <input type="text" id="c-vendedor" placeholder="Nome do Aluno que indicou">
+        <button class="btn-main" id="btn-pay" onclick="finalizarPagamento()">IR PARA O PAGAMENTO</button>
         <button onclick="fecharModal()" style="width:100%; border:none; background:none; margin-top:15px; color:#999; cursor:pointer;">Cancelar</button>
     </div>
 </div>
 
 <script>
-    // ✅ SEU LINK DO RENDER JÁ CONFIGURADO
     const API_URL = 'https://rifa-backend-e44o.onrender.com';
-    
     let dbStatus = {};
-    let selecionados = [];
     let precoCota = 10;
+    let selecionados = [];
+    let senhaAdmin = ''; // Armazena a senha temporariamente só no navegador de quem logou
 
     async function carregarStatus() {
         try {
             const res = await fetch(`${API_URL}/status-rifa`);
             if (res.ok) {
-                dbStatus = await res.json();
-                document.getElementById('loading-msg').style.display = 'none';
+                const data = await res.json();
+                dbStatus = data.dados;
+                precoCota = data.preco;
+                document.getElementById('display-preco').innerText = precoCota.toFixed(2);
             }
-        } catch (e) {
-            console.error("Servidor Offline");
-        } finally {
+        } catch (e) { console.error(e); }
+        finally {
+            document.getElementById('loading-msg').style.display = 'none';
             renderizarGrade();
         }
     }
@@ -116,9 +147,8 @@
             const btn = document.createElement('button');
             btn.innerText = i;
             btn.className = 'n-btn';
-            
-            if (dbStatus[i]) {
-                btn.classList.add(dbStatus[i].status === 'Pago' ? 'pago' : 'pendente');
+            if (dbStatus) {
+                btn.classList.add(dbStatus.status === 'Pago' ? 'pago' : 'pendente');
             } else {
                 btn.classList.add('livre');
                 btn.onclick = () => {
@@ -136,8 +166,9 @@
     }
 
     function abrirCheckout() {
-        if(selecionados.length === 0) return alert("Por favor, selecione ao menos um número!");
+        if(selecionados.length === 0) return alert("Escolha pelo menos um número!");
         document.getElementById('resumo-cotas').innerText = selecionados.join(', ');
+        document.getElementById('resumo-valor').innerText = `R$ ${(selecionados.length * precoCota).toFixed(2)}`;
         document.getElementById('modal-checkout').style.display = 'flex';
     }
 
@@ -145,41 +176,32 @@
         const comprador = document.getElementById('c-nome').value;
         const zap = document.getElementById('c-zap').value;
         const vendedor = document.getElementById('c-vendedor').value;
-
-        if(!comprador || !zap || !vendedor) return alert("Preencha todos os campos para prosseguir!");
+        if(!comprador || !zap || !vendedor) return alert("Preencha todos os dados!");
 
         const btn = document.getElementById('btn-pay');
-        btn.innerText = "GERANDO PAGAMENTO... ⏳";
+        btn.innerText = "VERIFICANDO SEGURANÇA... ⏳";
         btn.disabled = true;
 
         try {
             const res = await fetch(`${API_URL}/gerar-pagamento`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    valor: selecionados.length * precoCota,
-                    numeros: selecionados,
-                    comprador, zap, vendedor
-                })
+                // Não mandamos mais o valor daqui. O servidor decide. Anti-hacker ativado!
+                body: JSON.stringify({ numeros: selecionados, comprador, zap, vendedor })
             });
             const data = await res.json();
-            
             if(data.link) {
-                confetti({ particleCount: 150, spread: 70 });
-                setTimeout(() => window.location.href = data.link, 1000);
-            } else {
-                alert(data.erro || "Erro ao processar reserva.");
-                location.reload();
-            }
-        } catch (e) {
-            alert("O servidor demorou a responder. Tente novamente em instantes.");
-            btn.disabled = false;
-            btn.innerText = "PAGAR NO MERCADO PAGO";
-        }
+                confetti({ particleCount: 100, spread: 70 });
+                setTimeout(() => window.location.href = data.link, 800);
+            } else { alert("Erro: " + data.erro); location.reload(); }
+        } catch (e) { alert("Erro na conexão com o servidor."); btn.disabled = false; btn.innerText = "IR PARA O PAGAMENTO"; }
     }
 
-    function abrirAdmin() {
-        if(prompt("Senha Administrativa:") === 'IRB2026') {
+    function pedirSenha() {
+        senhaAdmin = prompt("Digite a Senha do Administrador:");
+        if(senhaAdmin) {
+            document.getElementById('main-title').innerText = "Painel Administrativo ⚙️";
+            document.getElementById('sub-title').innerText = "Modo de Segurança Ativado";
             document.getElementById('view-vendas').style.display = 'none';
             document.getElementById('view-admin').style.display = 'block';
             renderAdmin();
@@ -187,44 +209,87 @@
     }
 
     function renderAdmin() {
-        const lista = document.getElementById('lista-adm');
-        lista.innerHTML = '';
-        const chaves = Object.keys(dbStatus);
+        const tabela = document.getElementById('tabela-admin-body');
+        const rankingDiv = document.getElementById('ranking-vendedores');
+        tabela.innerHTML = '';
         
-        if (chaves.length === 0) {
-            lista.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">Nenhuma venda registrada.</p>';
-            return;
-        }
+        let totalPago = 0, totalPendente = 0, vendidosCount = 0;
+        let vendedoresRanking = {};
 
-        chaves.forEach(n => {
-            const d = dbStatus[n];
-            lista.innerHTML += `
-                <div style="border-bottom:1px solid #eee; padding:15px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-size: 0.9em;">
-                        <strong style="color:var(--primary)">#${n}</strong> - ${d.nome} <br>
-                        <small>Vendedor: ${d.vendedor} | Zap: ${d.zap}</small>
-                    </div>
-                    <div>
-                        ${d.status === 'Pendente' ? `<button onclick="admAcao(${n}, 'pagar')" style="background:var(--green); color:white; border:none; padding:8px; border-radius:8px; cursor:pointer;">Confirmar</button>` : '<span style="color:var(--green); font-weight:800;">PAGO</span>'}
-                        <button onclick="admAcao(${n}, 'excluir')" style="background:#ff4757; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer; margin-left:5px;">🗑</button>
-                    </div>
-                </div>`;
+        Object.keys(dbStatus).forEach(n => {
+            const d = dbStatus;
+            vendidosCount++;
+            if(d.status === 'Pago') totalPago += precoCota;
+            else totalPendente += precoCota;
+
+            vendedoresRanking = (vendedoresRanking || 0) + 1;
+
+            tabela.innerHTML += `
+                <tr>
+                    <td><strong>#${n}</strong></td>
+                    <td>${d.nome}<br><small>${d.zap}</small></td>
+                    <td>${d.vendedor}</td>
+                    <td><span class="badge ${d.status === 'Pago' ? 'bg-green' : 'bg-orange'}">${d.status}</span></td>
+                    <td>
+                        ${d.status === 'Pendente' ? `<button onclick="admAcao(${n}, 'pagar')" style="background:var(--green); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✔</button>` : ''}
+                        <button onclick="admAcao(${n}, 'excluir')" style="background:var(--red); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">🗑</button>
+                    </td>
+                </tr>`;
         });
+
+        document.getElementById('stat-pago').innerText = `R$ ${totalPago.toFixed(2)}`;
+        document.getElementById('stat-pendente').innerText = `R$ ${totalPendente.toFixed(2)}`;
+        document.getElementById('stat-total').innerText = `${vendidosCount}/100`;
+
+        rankingDiv.innerHTML = Object.entries(vendedoresRanking)
+            .sort((a,b) => b - a)
+            .map(() => `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dotted #ccc;"><span>${nome}</span> <strong>${qtd} rifas</strong></div>`)
+            .join('') || 'Nenhuma venda ainda.';
     }
 
     async function admAcao(numero, acao) {
-        if(!confirm("Deseja realizar esta ação?")) return;
-        await fetch(`${API_URL}/admin/acao`, {
+        if(!confirm("Tem certeza desta ação?")) return;
+        const res = await fetch(`${API_URL}/admin/acao`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ numero, acao })
+            body: JSON.stringify({ numero, acao, senha: senhaAdmin })
         });
+        if(res.status === 401) return alert("Senha incorreta ou expirada!");
         location.reload();
     }
 
-    function fecharModal() { document.getElementById('modal-checkout').style.display = 'none'; }
+    async function mudarPreco() {
+        const novo = prompt("Qual o novo valor da cota? (Apenas números)");
+        if(!novo || isNaN(novo)) return;
+        const res = await fetch(`${API_URL}/admin/config`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ novoPreco: novo, senha: senhaAdmin })
+        });
+        if(res.status === 401) return alert("Ação bloqueada: Senha incorreta!");
+        alert("Preço alterado com sucesso!");
+        location.reload();
+    }
 
-    // Inicia a carga de dados
+    function baixarPlanilha() {
+        let csv = "Numero da Cota,Nome do Comprador,WhatsApp,Vendedor,Status\n";
+        Object.keys(dbStatus).forEach(n => {
+            const d = dbStatus;
+            csv += `${n},${d.nome},${d.zap},${d.vendedor},${d.status}\n`;
+        });
+        
+        // Criação do arquivo para Download
+        const blob = new Blob(, { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Rifa_Terceirao.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function fecharModal() { document.getElementById('modal-checkout').style.display = 'none'; }
     carregarStatus();
 </script>
 </body>
