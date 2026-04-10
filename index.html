@@ -54,7 +54,6 @@
 </div>
 
 <div class="container">
-    <!-- VISÃO DO COMPRADOR -->
     <div id="view-vendas">
         <div class="card">
             <div id="loading-msg" style="text-align:center; padding: 10px; color: var(--primary); font-weight: bold;">
@@ -67,7 +66,6 @@
         </div>
     </div>
 
-    <!-- VISÃO DO ADMIN -->
     <div id="view-admin" style="display:none;">
         <div class="stats-grid">
             <div class="stat-card"><h4>💰 Pago</h4><p id="stat-pago">R$ 0</p></div>
@@ -103,7 +101,6 @@
     </div>
 </div>
 
-<!-- MODAL CHECKOUT -->
 <div class="modal" id="modal-checkout">
     <div class="modal-content">
         <h2 style="color:var(--primary)">Finalizar Reserva</h2>
@@ -122,7 +119,7 @@
     let dbStatus = {};
     let precoCota = 10;
     let selecionados = [];
-    let senhaAdmin = ''; // Armazena a senha temporariamente só no navegador de quem logou
+    let senhaAdmin = ''; 
 
     async function carregarStatus() {
         try {
@@ -147,6 +144,8 @@
             const btn = document.createElement('button');
             btn.innerText = i;
             btn.className = 'n-btn';
+            
+            // CORREÇÃO: Faltava o aqui
             if (dbStatus) {
                 btn.classList.add(dbStatus.status === 'Pago' ? 'pago' : 'pendente');
             } else {
@@ -186,7 +185,6 @@
             const res = await fetch(`${API_URL}/gerar-pagamento`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                // Não mandamos mais o valor daqui. O servidor decide. Anti-hacker ativado!
                 body: JSON.stringify({ numeros: selecionados, comprador, zap, vendedor })
             });
             const data = await res.json();
@@ -217,11 +215,13 @@
         let vendedoresRanking = {};
 
         Object.keys(dbStatus).forEach(n => {
+            // CORREÇÃO: Faltava o aqui
             const d = dbStatus;
             vendidosCount++;
             if(d.status === 'Pago') totalPago += precoCota;
             else totalPendente += precoCota;
 
+            // CORREÇÃO: Faltava o aqui
             vendedoresRanking = (vendedoresRanking || 0) + 1;
 
             tabela.innerHTML += `
@@ -241,6 +241,7 @@
         document.getElementById('stat-pendente').innerText = `R$ ${totalPendente.toFixed(2)}`;
         document.getElementById('stat-total').innerText = `${vendidosCount}/100`;
 
+        // CORREÇÃO: Variáveis ajustadas no map
         rankingDiv.innerHTML = Object.entries(vendedoresRanking)
             .sort((a,b) => b - a)
             .map(() => `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dotted #ccc;"><span>${nome}</span> <strong>${qtd} rifas</strong></div>`)
@@ -274,11 +275,12 @@
     function baixarPlanilha() {
         let csv = "Numero da Cota,Nome do Comprador,WhatsApp,Vendedor,Status\n";
         Object.keys(dbStatus).forEach(n => {
+            // CORREÇÃO: Faltava o aqui
             const d = dbStatus;
             csv += `${n},${d.nome},${d.zap},${d.vendedor},${d.status}\n`;
         });
         
-        // Criação do arquivo para Download
+        // CORREÇÃO MÁXIMA: Faltava envolver a variável csv nos colchetes
         const blob = new Blob(, { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);

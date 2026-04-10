@@ -11,25 +11,23 @@ const client = new MercadoPagoConfig({ accessToken: 'APP_USR-4694355899531295-04
 
 // 🛡️ SISTEMA DE SEGURANÇA E BANCO DE DADOS
 let rifaDB = {}; 
-let config = { precoCota: 10 }; // Preço base protegido
-const SENHA_ADMIN = 'IRB2026'; // A senha agora fica escondida no servidor
+let config = { precoCota: 10 }; 
+const SENHA_ADMIN = 'IRB2026'; 
 
-// Rota para o site ler os dados
 app.get('/status-rifa', (req, res) => {
     res.json({ dados: rifaDB, preco: config.precoCota });
 });
 
-// Rota para gerar pagamento (COM PROTEÇÃO ANTI-HACKER)
 app.post('/gerar-pagamento', async (req, res) => {
     try {
         const { numeros, comprador, zap, vendedor } = req.body;
 
+        // CORREÇÃO: Faltava o aqui
         const ocupados = numeros.filter(n => rifaDB);
         if (ocupados.length > 0) {
             return res.status(400).json({ erro: `Os números ${ocupados.join(', ')} já estão ocupados!` });
         }
 
-        // 🛡️ O servidor calcula o preço. É impossível fraudar pelo navegador.
         const valorRealSeguro = numeros.length * config.precoCota;
 
         const preference = new Preference(client);
@@ -50,6 +48,7 @@ app.post('/gerar-pagamento', async (req, res) => {
             }
         });
 
+        // CORREÇÃO: Faltava o aqui
         numeros.forEach(n => {
             rifaDB = { nome: comprador, zap, vendedor, status: 'Pendente' };
         });
@@ -62,11 +61,11 @@ app.post('/gerar-pagamento', async (req, res) => {
     }
 });
 
-// 🛡️ Rota Admin: Confirmar ou Excluir (EXIGE SENHA)
 app.post('/admin/acao', (req, res) => {
     const { numero, acao, senha } = req.body;
     if (senha !== SENHA_ADMIN) return res.status(401).json({ erro: "Acesso Negado: Senha Incorreta!" });
 
+    // CORREÇÃO: Faltava o aqui
     if (rifaDB) {
         if (acao === 'pagar') rifaDB.status = 'Pago';
         if (acao === 'excluir') delete rifaDB;
@@ -74,7 +73,6 @@ app.post('/admin/acao', (req, res) => {
     res.json({ ok: true });
 });
 
-// 🛡️ Rota Admin: Alterar Preço da Cota (EXIGE SENHA)
 app.post('/admin/config', (req, res) => {
     const { novoPreco, senha } = req.body;
     if (senha !== SENHA_ADMIN) return res.status(401).json({ erro: "Acesso Negado: Senha Incorreta!" });
