@@ -3,102 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIFA TERCEIRÃO 2026 | PREMIUM</title>
+    <title>RIFA DIA DAS MÃES | TERCEIRÃO 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #ff0055; --dark: #050505; --card: rgba(255, 255, 255, 0.05); --glass: rgba(255, 255, 255, 0.1); }
-        body { background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --main: #ff0055; --dark: #0a0a0a; --orange: #f39c12; --green: #00ff88; --glass: rgba(255, 255, 255, 0.08); }
+        body { background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; margin: 0; }
         
-        /* Header Estilo Luxury */
-        .hero { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1000'); background-size: cover; padding: 60px 20px; text-align: center; border-bottom: 2px solid var(--main); }
-        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 2.5em; margin: 0; letter-spacing: 4px; color: var(--main); }
+        .hero { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1000'); background-size: cover; padding: 60px 20px; text-align: center; border-bottom: 2px solid var(--main); }
+        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 2.2em; color: var(--main); margin: 0; letter-spacing: 3px; }
+        .hero p { color: #aaa; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .container { max-width: 900px; margin: -40px auto 50px; padding: 15px; }
+        .card { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 25px; padding: 25px; margin-bottom: 20px; }
         
-        .container { max-width: 1000px; margin: -40px auto 50px; padding: 15px; }
-        .glass-card { background: var(--card); backdrop-filter: blur(15px); border: 1px solid var(--glass); border-radius: 25px; padding: 25px; margin-bottom: 20px; }
-        
-        /* Grid Gamer/Premium */
+        /* Grid de Números */
         .grid-rifa { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; margin: 25px 0; }
-        @media (max-width: 700px) { .grid-rifa { grid-template-columns: repeat(5, 1fr); } }
+        @media (max-width: 600px) { .grid-rifa { grid-template-columns: repeat(5, 1fr); } }
 
-        .btn-n { border: 1px solid var(--glass); padding: 15px 0; border-radius: 12px; font-weight: 800; cursor: pointer; background: var(--glass); color: #fff; font-size: 1em; transition: 0.2s; }
-        .btn-n.livre:hover { border-color: var(--main); box-shadow: 0 0 15px var(--main); }
-        .btn-n.sel { background: var(--main) !important; color: white; transform: scale(1.1); border: none; }
-        .btn-n.pendente { background: #333 !important; color: #666; cursor: not-allowed; opacity: 0.5; }
-        .btn-n.pago { background: #00ff88 !important; color: #000; box-shadow: 0 0 10px #00ff88; }
+        .btn-n { border: 1px solid rgba(255,255,255,0.1); padding: 15px 0; border-radius: 12px; font-weight: 800; cursor: pointer; background: rgba(255,255,255,0.05); color: #fff; transition: 0.2s; }
+        .btn-n.livre:hover { border-color: var(--main); box-shadow: 0 0 10px var(--main); }
+        .btn-n.sel { background: var(--main) !important; transform: scale(1.1); box-shadow: 0 0 20px var(--main); }
+        .btn-n.pendente { background: var(--orange) !important; color: #000; cursor: not-allowed; }
+        .btn-n.pago { background: var(--green) !important; color: #000; box-shadow: 0 0 15px var(--green); cursor: not-allowed; }
 
-        /* Barra de Progresso */
-        .progress-container { background: #222; border-radius: 50px; height: 15px; margin: 20px 0; overflow: hidden; }
-        .progress-bar { background: var(--main); height: 100%; width: 0%; transition: 1s ease-in-out; }
+        .progress-bar { background: #222; border-radius: 50px; height: 12px; margin: 15px 0; overflow: hidden; }
+        .progress-fill { background: var(--main); height: 100%; width: 0%; transition: 1s; box-shadow: 0 0 10px var(--main); }
 
-        .buy-btn { background: var(--main); color: white; border: none; padding: 20px; border-radius: 50px; width: 100%; font-weight: 800; font-size: 1.2em; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .buy-btn { background: var(--main); color: white; border: none; padding: 20px; border-radius: 50px; width: 100%; font-weight: 800; font-size: 1.1em; cursor: pointer; box-shadow: 0 5px 20px rgba(255,0,85,0.3); }
         
-        /* Painel Admin Moderno */
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat { background: var(--glass); padding: 20px; border-radius: 20px; text-align: center; border-left: 4px solid var(--main); }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; color: var(--main); padding: 10px; border-bottom: 1px solid #333; }
-        td { padding: 15px 10px; border-bottom: 1px solid #222; }
+        /* Admin */
+        .admin-stat { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: var(--glass); padding: 15px; border-radius: 15px; text-align: center; border-left: 4px solid var(--main); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85em; }
+        th { color: var(--main); text-align: left; padding: 10px; border-bottom: 1px solid #333; }
+        td { padding: 10px; border-bottom: 1px solid #111; }
 
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; }
-        .modal-box { background: #111; padding: 40px; border-radius: 30px; border: 1px solid var(--main); width: 90%; max-width: 450px; text-align: center; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; font-size: 1em; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; align-items:center; justify-content:center; }
+        .modal-box { background: #111; padding: 35px; border-radius: 30px; border: 1px solid var(--main); width: 90%; max-width: 450px; text-align: center; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="hero">
-    <h1>TERCEIRÃO 2026</h1>
-    <p>RIFA EXCLUSIVA | ESCOLA IRB</p>
+    <h1>RIFA DIA DAS MÃES</h1>
+    <p>TERCEIRÃO 2026</p>
 </div>
 
 <div class="container">
-    <div id="vendas-ui">
-        <div class="glass-card">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <span>VENDIDOS: <b id="count-vendidos">0</b>/100</span>
-                <span>VALOR: <b style="color:var(--main)">R$ <span id="val-cota">0</span></b></span>
+    <div id="ui-vendas">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span>VENDIDOS: <b id="txt-count">0</b>/100</span>
+                <span>VALOR: <b style="color:var(--main)">R$ <span id="txt-preco">0</span></b></span>
             </div>
-            <div class="progress-container"><div class="progress-bar" id="bar"></div></div>
-            
+            <div class="progress-bar"><div class="progress-fill" id="bar"></div></div>
             <div class="grid-rifa" id="grid"></div>
-            
-            <button class="buy-btn" onclick="abrirCheck()">RESERVAR AGORA</button>
-            <button onclick="admLogin()" style="background:none; border:none; color:#444; width:100%; margin-top:20px; cursor:pointer;">ADMIN PANEL</button>
+            <button class="buy-btn" onclick="abrirCheck()">RESERVAR SELECIONADOS</button>
+            <button onclick="admLogin()" style="background:none; border:none; color:#333; width:100%; margin-top:30px; cursor:pointer;">Admin ⚙️</button>
         </div>
     </div>
 
-    <div id="admin-ui" style="display:none;">
-        <div class="admin-grid">
-            <div class="stat"><h3>Faturamento</h3><p id="adm-faturado">R$ 0</p></div>
-            <div class="stat"><h3>Pendentes</h3><p id="adm-pendente">R$ 0</p></div>
-            <div class="stat"><h3>Ações</h3>
-                <button onclick="mudarPreco()" style="padding:5px; margin-bottom:5px;">Mudar Valor</button>
-                <button onclick="limparTudo()" style="background:red; color:white;">Reset Geral</button>
-                <button onclick="sortear()" style="background:gold; color:black;">Sortear Ganhador</button>
-            </div>
+    <div id="ui-admin" style="display:none;">
+        <div class="admin-stat">
+            <div class="stat-box"><h4>Pago</h4><p id="adm-pago">R$ 0</p></div>
+            <div class="stat-box"><h4>Pendente</h4><p id="adm-pend">R$ 0</p></div>
+            <div class="stat-box"><h4>Vendas</h4><p id="adm-total">0/100</p></div>
         </div>
-        <div class="glass-card">
-            <input type="text" id="busca" placeholder="Buscar por nome ou número..." onkeyup="filtrar()">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <button onclick="mudarPreco()">💲 Mudar Valor</button>
+                <button onclick="limparTudo()" style="color:red">🗑 Reset Geral</button>
+            </div>
+            <input type="text" id="busca" placeholder="Filtrar por nome ou número..." onkeyup="filtrar()">
             <table>
-                <thead><tr><th>Nº</th><th>Nome</th><th>Vendedor</th><th>Status</th><th>Ações</th></tr></thead>
-                <tbody id="lista-admin"></tbody>
+                <thead><tr><th>Nº</th><th>Nome</th><th>Vendedor</th><th>Status</th><th>Ação</th></tr></thead>
+                <tbody id="lista-adm"></tbody>
             </table>
-            <button class="buy-btn" onclick="location.reload()" style="margin-top:20px; background:#444;">VOLTAR</button>
+            <button class="buy-btn" onclick="location.reload()" style="margin-top:20px; background:#222;">VOLTAR</button>
         </div>
     </div>
 </div>
 
 <div class="modal" id="modal-c">
     <div class="modal-box">
-        <h2 style="color:var(--main)">FINALIZAR RESERVA</h2>
-        <p id="resumo"></p>
-        <input type="text" id="n" placeholder="Seu Nome Completo">
-        <input type="tel" id="z" placeholder="WhatsApp (81) 9....">
-        <input type="text" id="v" placeholder="Aluno que te vendeu">
-        <button class="buy-btn" id="pay-b" onclick="pagar()">IR PARA PAGAMENTO</button>
-        <button onclick="fechar()" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">CANCELAR</button>
+        <h2 style="color:var(--main)">FINALIZAR</h2>
+        <p id="resumo-c"></p>
+        <input type="text" id="in-nome" placeholder="Seu Nome Completo">
+        <input type="tel" id="in-zap" placeholder="WhatsApp (DDD + Número)">
+        <input type="text" id="in-vend" placeholder="Quem te vendeu? (Opcional)">
+        <button class="buy-btn" id="btn-pay" onclick="pagar()">GERAR PAGAMENTO</button>
+        <button onclick="fechar()" style="background:none; border:none; color:#555; margin-top:15px; cursor:pointer;">Cancelar</button>
     </div>
 </div>
 
@@ -107,12 +103,14 @@
     let db = {}, valor = 10, sel = [], senha = '';
 
     async function carregar() {
-        const r = await fetch(`${API}/status-rifa`);
-        const d = await r.json();
-        db = d.dados; valor = d.preco;
-        document.getElementById('val-cota').innerText = valor.toFixed(2);
-        render();
-        if(document.getElementById('admin-ui').style.display === 'block') renderAdm();
+        try {
+            const r = await fetch(`${API}/status-rifa`);
+            const d = await r.json();
+            db = d.dados; valor = d.preco;
+            document.getElementById('txt-preco').innerText = valor.toFixed(2);
+            render();
+            if(document.getElementById('ui-admin').style.display === 'block') renderAdm();
+        } catch (e) { console.error(e); }
     }
 
     function render() {
@@ -134,59 +132,64 @@
             }
             g.appendChild(b);
         }
-        document.getElementById('count-vendidos').innerText = count;
+        document.getElementById('txt-count').innerText = count;
         document.getElementById('bar').style.width = count + '%';
     }
 
     function abrirCheck() {
-        if(!sel.length) return alert("Escolha os números!");
-        document.getElementById('resumo').innerText = `Números: ${sel.join(', ')} | Total: R$ ${(sel.length * valor).toFixed(2)}`;
+        if(!sel.length) return alert("Escolha um número!");
+        document.getElementById('resumo-c').innerText = `Cotas: ${sel.join(', ')} | Total: R$ ${(sel.length * valor).toFixed(2)}`;
         document.getElementById('modal-c').style.display = 'flex';
     }
 
     async function pagar() {
-        const btn = document.getElementById('pay-b'); btn.innerText = "PROCESSANDO..."; btn.disabled = true;
+        const nome = document.getElementById('in-nome').value;
+        const zap = document.getElementById('in-zap').value;
+        if(!nome || !zap) return alert("Preencha Nome e WhatsApp!");
+
+        const btn = document.getElementById('btn-pay'); btn.innerText = "PROCESSANDO..."; btn.disabled = true;
         const res = await fetch(`${API}/gerar-pagamento`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ numeros: sel, comprador: document.getElementById('n').value, zap: document.getElementById('z').value, vendedor: document.getElementById('v').value })
+            body: JSON.stringify({ numeros: sel, comprador: nome, zap, vendedor: document.getElementById('in-vend').value })
         });
         const d = await res.json();
-        if(d.link) window.location.href = d.link;
+        if(d.link) {
+            confetti({ particleCount: 150 });
+            setTimeout(() => window.location.href = d.link, 1000);
+        }
     }
 
-    // --- ADMIN FUNCTIONS ---
     function admLogin() {
         senha = prompt("Senha Admin:");
         if(senha === 'IRB2026') {
-            document.getElementById('vendas-ui').style.display = 'none';
-            document.getElementById('admin-ui').style.display = 'block';
+            document.getElementById('ui-vendas').style.display = 'none';
+            document.getElementById('ui-admin').style.display = 'block';
             renderAdm();
         }
     }
 
     function renderAdm() {
-        const l = document.getElementById('lista-admin'); l.innerHTML = '';
-        let pago = 0, pend = 0;
+        const l = document.getElementById('lista-adm'); l.innerHTML = '';
+        let pago = 0, pend = 0, total = 0;
         Object.keys(db).forEach(n => {
-            const d = db[n];
+            const d = db[n]; total++;
             if(d.status === 'Pago') pago += valor; else pend += valor;
             l.innerHTML += `<tr>
                 <td>#${n}</td><td>${d.nome}</td><td>${d.vendedor}</td>
-                <td><b style="color:${d.status === 'Pago' ? '#00ff88' : '#ff9900'}">${d.status}</b></td>
+                <td style="color:${d.status === 'Pago' ? '#00ff88' : '#f39c12'}">${d.status}</td>
                 <td>
                     <button onclick="admAcao(${n}, 'pagar')">✔</button>
-                    <button onclick="admAcao(${n}, 'excluir')" style="color:red">🗑</button>
-                    <a href="https://wa.me/${d.zap.replace(/\D/g,'')}" target="_blank">📱</a>
+                    <button onclick="admAcao(${n}, 'excluir')">🗑</button>
                 </td>
             </tr>`;
         });
-        document.getElementById('adm-faturado').innerText = `R$ ${pago}`;
-        document.getElementById('adm-pendente').innerText = `R$ ${pend}`;
+        document.getElementById('adm-pago').innerText = `R$ ${pago}`;
+        document.getElementById('adm-pend').innerText = `R$ ${pend}`;
+        document.getElementById('adm-total').innerText = `${total}/100`;
     }
 
     async function admAcao(n, acao) {
-        if(!confirm("Confirmar?")) return;
         await fetch(`${API}/admin/acao`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -196,18 +199,19 @@
     }
 
     async function mudarPreco() {
-        const n = prompt("Novo Preço da Cota:");
-        if(!n) return;
-        await fetch(`${API}/admin/config`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ novoPreco: n, senha })
-        });
-        carregar();
+        const n = prompt("Novo Preço:");
+        if(n) {
+            await fetch(`${API}/admin/config`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ novoPreco: n, senha })
+            });
+            carregar();
+        }
     }
 
     async function limparTudo() {
-        if(confirm("DELETAR TODAS AS VENDAS?")) {
+        if(confirm("DELETAR TUDO?")) {
             await fetch(`${API}/admin/acao`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -217,12 +221,12 @@
         }
     }
 
-    function sortear() {
-        const pagos = Object.keys(db).filter(n => db[n].status === 'Pago');
-        if(!pagos.length) return alert("Nenhum número pago!");
-        const win = pagos[Math.floor(Math.random() * pagos.length)];
-        alert(`O NÚMERO GANHADOR É: #${win} - ${db[win].nome}!!! 🎉`);
-        confetti({ particleCount: 200, spread: 100 });
+    function filtrar() {
+        const f = document.getElementById('busca').value.toUpperCase();
+        const rows = document.getElementById('lista-adm').getElementsByTagName('tr');
+        for (let r of rows) {
+            r.style.display = r.innerText.toUpperCase().includes(f) ? '' : 'none';
+        }
     }
 
     function fechar() { document.getElementById('modal-c').style.display = 'none'; }
