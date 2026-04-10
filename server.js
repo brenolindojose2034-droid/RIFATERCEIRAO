@@ -6,33 +6,33 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-// 🔴 SEU TOKEN AQUI
+// ✅ SEU TOKEN JÁ CONFIGURADO
 const client = new MercadoPagoConfig({ accessToken: 'APP_USR-4694355899531295-041011-0bf7821dc292c43d8132bfc72e773da6-2411883020' });
 
-// Banco de dados temporário (em memória)
+// Banco de dados temporário (fica na memória do Render)
 let rifaDB = {}; 
 
-// Rota para ver quais números já foram vendidos/reservados
+// Rota para ver o status dos números
 app.get('/status-rifa', (req, res) => {
     res.json(rifaDB);
 });
 
-// Rota para reservar e gerar pagamento
+// Rota para gerar o link de pagamento
 app.post('/gerar-pagamento', async (req, res) => {
     try {
         const { valor, numeros, comprador, zap, vendedor } = req.body;
 
-        // Segurança: Verifica se algum número já foi vendido nesse meio tempo
+        // Verifica se alguém já reservou esses números
         const ocupados = numeros.filter(n => rifaDB[n]);
         if (ocupados.length > 0) {
-            return res.status(400).json({ erro: `Os números ${ocupados.join(', ')} já foram reservados!` });
+            return res.status(400).json({ erro: `Os números ${ocupados.join(', ')} já estão ocupados!` });
         }
 
         const preference = new Preference(client);
         const response = await preference.create({
             body: {
                 items: [{
-                    title: `Rifa Mães - Cotas: ${numeros.join(', ')}`,
+                    title: `Rifa Terceirão - Cotas: ${numeros.join(', ')}`,
                     quantity: 1,
                     unit_price: Number(valor),
                     currency_id: 'BRL',
@@ -41,7 +41,7 @@ app.post('/gerar-pagamento', async (req, res) => {
             }
         });
 
-        // Reserva os números como "Pendente" (Laranja)
+        // Marca como Pendente (Laranja no site)
         numeros.forEach(n => {
             rifaDB[n] = { nome: comprador, zap, vendedor, status: 'Pendente' };
         });
@@ -50,18 +50,21 @@ app.post('/gerar-pagamento', async (req, res) => {
         
     } catch (error) {
         console.error(error);
-        res.status(500).json({ erro: "Erro ao processar" });
+        res.status(500).json({ erro: "Erro ao gerar pagamento no Mercado Pago" });
     }
 });
 
-// Rota Admin para mudar status ou excluir (chamada pelo site)
+// Rota Admin
 app.post('/admin/acao', (req, res) => {
     const { numero, acao } = req.body;
-    if (acao === 'pagar') rifaDB[numero].status = 'Pago';
-    if (acao === 'excluir') delete rifaDB[numero];
+    if (rifaDB[numero]) {
+        if (acao === 'pagar') rifaDB[numero].status = 'Pago';
+        if (acao === 'excluir') delete rifaDB[numero];
+    }
     res.json({ ok: true });
 });
 
-app.listen(3000, () => {
-    console.log("🚀 Servidor da Rifa ON na porta 3000!");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor da Rifa ON na porta ${PORT}!`);
 });
