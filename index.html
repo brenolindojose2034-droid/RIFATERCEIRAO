@@ -11,7 +11,7 @@
         body { background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; margin: 0; overflow-x: hidden; }
         
         .header { background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=1000'); background-size: cover; padding: 70px 20px; text-align: center; border-bottom: 3px solid var(--blue); }
-        .logo-img { max-width: 150px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--blue)); }
+        .logo-img { max-width: 150px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--blue)); }
         .header h1 { font-family: 'Orbitron', sans-serif; font-size: 2.6em; color: var(--pink); margin: 0; text-shadow: 0 0 20px var(--pink); }
         .header p { color: #00d4ff; letter-spacing: 5px; font-weight: bold; margin-top: 10px; font-family: 'Orbitron'; }
 
@@ -44,19 +44,18 @@
         .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(10px); }
         .modal-box { background: #08080f; padding: 50px; border-radius: 40px; border: 1px solid var(--blue); width: 90%; max-width: 500px; text-align: center; box-shadow: 0 0 50px var(--blue); }
         input { width: 100%; padding: 18px; margin: 15px 0; border-radius: 15px; border: 1px solid #222; background: #000; color: #fff; font-size: 1em; }
-        input:focus { border-color: var(--blue); outline: none; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="logo.png" class="logo-img" alt="TERCEIRÃO 2026" onerror="this.style.display='none'">
+    <img src="logo.png" class="logo-img" alt="Logo Terceirão" onerror="this.style.display='none'">
     <h1>RIFA DIA DAS MÃES</h1>
     <p>TERCEIRÃO 2026</p>
 </div>
 
 <div class="container">
-    <div id="view-vendas">
+    <div id="vendas">
         <div class="card">
             <div class="stats">
                 <span>VENDIDOS: <span id="c-count">0</span>/100</span>
@@ -64,19 +63,20 @@
             </div>
             <div class="bar-container"><div class="bar-fill" id="bar"></div></div>
             <div class="grid" id="grid"></div>
-            <button class="btn-main" id="res-btn" onclick="abrirCheck()">RESERVAR SELECIONADOS</button>
+            <button class="btn-main" onclick="abrirCheck()">RESERVAR SELECIONADOS</button>
             <button onclick="admLogin()" style="background:none; border:none; color:#111; width:100%; margin-top:50px; cursor:pointer;">Admin ⚙️</button>
         </div>
     </div>
 
-    <div id="view-admin" style="display:none;">
+    <div id="admin" style="display:none;">
         <div class="adm-grid">
             <div class="adm-box"><h4>Pago</h4><p id="adm-p" style="color:var(--green); font-size: 1.6em; font-weight: bold;">R$ 0</p></div>
             <div class="adm-box"><h4>Pendente</h4><p id="adm-r" style="color:var(--orange); font-size: 1.6em; font-weight: bold;">R$ 0</p></div>
-            <div class="adm-box"><h4>Ranking</h4><div id="ranking" style="font-size: 0.8em; margin-top:10px; color: #888;"></div></div>
+            <div class="adm-box"><h4>Vendas</h4><p id="adm-t" style="font-size: 1.6em; font-weight: bold;">0/100</p></div>
         </div>
         <div class="card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:25px;">
+            <div id="ranking" style="margin-bottom: 20px; font-size: 0.9em; color: #888;"></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:25px; flex-wrap: wrap; gap:10px;">
                 <button onclick="mudarPreco()" style="background:var(--blue); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">💲 Alterar Preço</button>
                 <button onclick="baixarPlanilha()" style="color:var(--green); background:none; border:none; cursor:pointer;">📥 Baixar CSV</button>
                 <button onclick="limparTudo()" style="color:red; background:none; border:none; cursor:pointer;">🗑 Reset Geral</button>
@@ -84,7 +84,7 @@
             <input type="text" id="busca" placeholder="Filtrar por nome, número ou vendedor..." onkeyup="filtrar()">
             <div style="overflow-x:auto;">
                 <table>
-                    <thead><tr><th>Nº</th><th>Comprador</th><th>Vendedor</th><th>Status</th><th>Ações</th></tr></thead>
+                    <thead><tr><th>Nº</th><th>Nome</th><th>Vendedor</th><th>Status</th><th>Ações</th></tr></thead>
                     <tbody id="lista-adm"></tbody>
                 </table>
             </div>
@@ -116,7 +116,7 @@
             db = d.dados; valor = d.preco;
             document.getElementById('c-preco').innerText = valor.toFixed(2);
             render();
-            if(document.getElementById('view-admin').style.display === 'block') renderAdm();
+            if(document.getElementById('admin').style.display === 'block') renderAdm();
         } catch (e) { console.error("Erro"); }
     }
 
@@ -152,7 +152,7 @@
     async function pagar() {
         const n = document.getElementById('f-nome').value;
         const z = document.getElementById('f-zap').value;
-        if(!n || !z) return alert("Preencha Nome e WhatsApp!");
+        if(!n || !z) return alert("Nome e WhatsApp são obrigatórios!");
 
         // 🚀 BUG DO LARANJA FIX: Força a cor localmente antes de redirecionar
         sel.forEach(num => { db[num] = { status: 'Pendente' }; });
@@ -179,25 +179,31 @@
     function admLogin() {
         senha = prompt("Senha Admin:");
         if(senha === 'IRB2026') {
-            document.getElementById('view-vendas').style.display = 'none';
-            document.getElementById('view-admin').style.display = 'block';
+            document.getElementById('vendas').style.display = 'none';
+            document.getElementById('admin').style.display = 'block';
             renderAdm();
         }
     }
 
     function renderAdm() {
-        const l = document.getElementById('lista-admin'); l.innerHTML = '';
+        const l = document.getElementById('lista-adm'); l.innerHTML = '';
         const rankDiv = document.getElementById('ranking'); rankDiv.innerHTML = '';
-        let p = 0, r = 0, rank = {};
+        let p = 0, r = 0, t = 0;
+        let rank = {};
+
         Object.keys(db).forEach(n => {
-            const d = db[n];
+            const d = db[n]; t++;
             if(d.status === 'Pago') { p += valor; rank[d.vendedor] = (rank[d.vendedor] || 0) + 1; }
             else r += valor;
             l.innerHTML += `<tr><td>#${n}</td><td>${d.nome}</td><td>${d.vendedor}</td><td style="color:${d.status === 'Pago' ? '#00ff88' : '#ff9500'}; font-weight:bold">${d.status}</td><td><button onclick="admAcao(${n}, 'pagar')">✔</button><button onclick="admAcao(${n}, 'excluir')">🗑</button></td></tr>`;
         });
         document.getElementById('adm-p').innerText = `R$ ${p.toFixed(2)}`;
         document.getElementById('adm-r').innerText = `R$ ${r.toFixed(2)}`;
-        Object.entries(rank).sort((a,b)=>b[1]-a[1]).forEach(([nome, qtd]) => { rankDiv.innerHTML += `<div>${nome || 'Direta'}: ${qtd} cotas</div>`; });
+        document.getElementById('adm-t').innerText = `${t}/100`;
+        
+        Object.entries(rank).sort((a,b)=>b[1]-a[1]).forEach(([nome, qtd]) => {
+            rankDiv.innerHTML += `<div>${nome || 'Direta'}: ${qtd} cotas pagas</div>`;
+        });
     }
 
     async function admAcao(n, acao) {
@@ -237,8 +243,7 @@
     }
 
     function fechar() { document.getElementById('modal-c').style.display = 'none'; }
-    carregar();
-    setInterval(carregar, 30000);
+    carregar(); setInterval(carregar, 30000);
 </script>
 </body>
 </html>
